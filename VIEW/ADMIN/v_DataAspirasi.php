@@ -16,13 +16,16 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Aspirasi - Admin Panel</title>
     <link rel="stylesheet" href="../../ASSETS/NavbarAdmin.css">
+    <link rel="website icon" href="../../ASSETS/GAMBAR/logoapk.jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <?php include '../../template/NavbarAdmin.php'; ?>
 
@@ -34,27 +37,29 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
 
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="alert alert-success">
-                    <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                    <?php echo $_SESSION['success'];
+                    unset($_SESSION['success']); ?>
                 </div>
             <?php endif; ?>
 
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="alert alert-error">
-                    <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                    <?php echo $_SESSION['error'];
+                    unset($_SESSION['error']); ?>
                 </div>
             <?php endif; ?>
 
             <!-- Filter Section -->
             <div class="filter-section">
-                <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <select name="filter" onchange="this.form.submit()">
+                <form method="GET" id="filterForm" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <select name="filter" onchange="resetValueAndSubmit()">
                         <option value="">Semua Data</option>
                         <option value="status" <?php echo $filterType == 'status' ? 'selected' : ''; ?>>Status</option>
                         <option value="lokasi" <?php echo $filterType == 'lokasi' ? 'selected' : ''; ?>>Lokasi</option>
                         <option value="tanggal" <?php echo $filterType == 'tanggal' ? 'selected' : ''; ?>>Tanggal</option>
                         <option value="bulan" <?php echo $filterType == 'bulan' ? 'selected' : ''; ?>>Bulan</option>
                     </select>
-                    
+
                     <?php if ($filterType == 'status'): ?>
                         <select name="value" onchange="this.form.submit()">
                             <option value="">Pilih Status</option>
@@ -73,12 +78,23 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
                             <option value="lab" <?php echo $filterValue == 'lab' ? 'selected' : ''; ?>>Lab</option>
                         </select>
                     <?php elseif ($filterType == 'tanggal'): ?>
-                        <input type="date" name="value" value="<?php echo $filterValue; ?>" onchange="this.form.submit()">
+                        <input type="date" name="value" value="<?php echo ($filterType == 'tanggal') ? $filterValue : ''; ?>" onchange="this.form.submit()">
                     <?php elseif ($filterType == 'bulan'): ?>
-                        <input type="month" name="value" value="<?php echo $filterValue; ?>" onchange="this.form.submit()">
+                        <input type="month" name="value" value="<?php echo ($filterType == 'bulan') ? $filterValue : ''; ?>" onchange="this.form.submit()">
                     <?php endif; ?>
                 </form>
             </div>
+
+            <script>
+                // Fungsi untuk membersihkan nilai 'value' saat tipe filter diganti
+                function resetValueAndSubmit() {
+                    const url = new URL(window.location.href);
+                    const filterSelect = document.querySelector('select[name="filter"]');
+
+                    // Redirect ke halaman yang sama hanya dengan parameter filter, tanpa parameter value lama
+                    window.location.href = `v_DataAspirasi.php?filter=${filterSelect.value}`;
+                }
+            </script>
 
             <div class="table-container">
                 <table>
@@ -95,37 +111,37 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
+                        <?php
                         $no = 1;
-                        foreach ($aspirasiList as $aspirasi): 
+                        foreach ($aspirasiList as $aspirasi):
                         ?>
-                        <tr>
-                            <td><?php echo $no++; ?></td>
-                            <td><?php echo date('d/m/Y', strtotime($aspirasi['tanggal_dikirim'])); ?></td>
-                            <td><?php echo htmlspecialchars($aspirasi['nama_siswa']); ?><br>
-                                <small><?php echo htmlspecialchars($aspirasi['kelas']); ?></small>
-                            </td>
-                            <td><?php echo htmlspecialchars($aspirasi['judul_laporan']); ?></td>
-                            <td><?php echo ucfirst($aspirasi['lokasi']); ?></td>
-                            <td>
-                                <span class="badge badge-<?php echo explode(' ', $aspirasi['kategori_prioritas'])[0]; ?>">
-                                    <?php echo $aspirasi['kategori_prioritas']; ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-<?php echo $aspirasi['status']; ?>">
-                                    <?php echo ucfirst($aspirasi['status']); ?>
-                                </span>
-                            </td>
-                            <td>
-                                <button onclick="openDetailModal(<?php echo $aspirasi['id_aspirasi']; ?>)" class="btn btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <a href="UmpanBalik.php?id=<?php echo $aspirasi['id_aspirasi']; ?>" class="btn btn-warning">
-                                    <i class="fas fa-comment"></i>
-                                </a>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td><?php echo $no++; ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($aspirasi['tanggal_dikirim'])); ?></td>
+                                <td><?php echo htmlspecialchars($aspirasi['nama_siswa']); ?><br>
+                                    <small><?php echo htmlspecialchars($aspirasi['kelas']); ?></small>
+                                </td>
+                                <td><?php echo htmlspecialchars($aspirasi['judul_laporan']); ?></td>
+                                <td><?php echo ucfirst($aspirasi['lokasi']); ?></td>
+                                <td>
+                                    <span class="badge badge-<?php echo explode(' ', $aspirasi['kategori_prioritas'])[0]; ?>">
+                                        <?php echo $aspirasi['kategori_prioritas']; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-<?php echo $aspirasi['status']; ?>">
+                                        <?php echo ucfirst($aspirasi['status']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button onclick="openDetailModal(<?php echo $aspirasi['id_aspirasi']; ?>)" class="btn btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="UmpanBalik.php?id=<?php echo $aspirasi['id_aspirasi']; ?>" class="btn btn-warning">
+                                        <i class="fas fa-comment"></i>
+                                    </a>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -156,11 +172,11 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
                     document.getElementById('detailContent').innerHTML = data;
                 });
         }
-        
+
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
         }
-        
+
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.classList.remove('active');
@@ -168,4 +184,5 @@ $aspirasiList = $aspirasiController->getAspirasiFiltered($filterType, $filterVal
         }
     </script>
 </body>
+
 </html>

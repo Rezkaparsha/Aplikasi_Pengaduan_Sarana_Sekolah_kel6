@@ -23,6 +23,7 @@ $admins = $adminModel->getAllAdmin();
     <title>Dashboard Admin - Aplikasi Pengaduan</title>
     <link rel="stylesheet" href="../../ASSETS/NavbarAdmin.css">
     <link rel="stylesheet" href="../../ASSETS/dasbordAdmin.css">
+    <link rel="website icon" href="../../ASSETS/GAMBAR/logoapk.jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>

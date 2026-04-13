@@ -52,4 +52,5 @@ class Koneksi {
      */
     private function __clone() {}
 }
+
 ?>
