@@ -37,7 +37,7 @@ class AdminController {
         }
     }
 
-    // ================= SISWA =================
+    //SISWA 
 
     public function tambahSiswa($data) {
         if ($this->siswaModel->cekNis($data['nis'])) {
@@ -78,7 +78,7 @@ class AdminController {
         exit();
     }
 
-    // ================= ASPIRASI =================
+    //ASPIRASI
 
     public function updateStatusAspirasi($id, $status) {
         $idAdmin = $_SESSION['id_admin'];
@@ -124,7 +124,7 @@ class AdminController {
         exit();
     }
 
-    // ================= UMPAN BALIK =================
+    // UMPAN BALIK
 
     public function tambahUmpanBalik($data) {
         $data['id_admin'] = $_SESSION['id_admin'];
@@ -152,7 +152,7 @@ class AdminController {
         exit();
     }
 
-    // ================= PROGRES =================
+    //PROGRES
 
     public function tambahProgres($data, $file) {
 
@@ -189,7 +189,7 @@ class AdminController {
     }
 }
 
-// ================= HANDLE REQUEST =================
+//HANDLE REQUEST
 
 $controller = new AdminController();
 

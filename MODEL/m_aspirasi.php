@@ -4,7 +4,7 @@ require_once 'm_koneksi.php';
 class Aspirasi {
     private $koneksi;
 
-    // Properties
+    // Properti 
     public $id_aspirasi;
     public $nis;
     public $id_admin;
@@ -22,7 +22,6 @@ class Aspirasi {
         $this->koneksi = $db->koneksi;
     }
 
-    // ===================== GET =====================
 
     public function getAllAspirasi() {
         $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
@@ -67,7 +66,7 @@ class Aspirasi {
         return $data;
     }
 
-    // ===================== INSERT =====================
+    // TAMBAH
 
     public function tambahAspirasi($data) {
         $nis = intval($data['nis']);
@@ -89,7 +88,7 @@ class Aspirasi {
         return false;
     }
 
-    // ===================== UPDATE =====================
+    // UPDATE
 
     public function updateStatus($id, $status, $idAdmin) {
         $id = intval($id);
@@ -112,7 +111,7 @@ class Aspirasi {
         return mysqli_query($this->koneksi, $query);
     }
 
-    // ===================== DELETE (INI YANG PENTING) =====================
+    //DELETE
 
     public function hapusAspirasi($id, $nis) {
         $id = intval($id);
@@ -124,7 +123,7 @@ class Aspirasi {
         return mysqli_query($this->koneksi, $query);
     }
 
-    // ===================== FILTER =====================
+    //FILTER
 
     public function filterByTanggal($tanggal) {
         $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
@@ -208,7 +207,7 @@ class Aspirasi {
         return $data;
     }
 
-    // ===================== STATISTIK =====================
+    //STATISTIK
 
     public function getStatistik() {
         $statistik = [];

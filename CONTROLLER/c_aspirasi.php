@@ -24,7 +24,7 @@ class AspirasiController
         $this->progresModel = new Progres();
     }
 
-    // ==================== FILTER ASPIRASI ====================
+    //FILTER ASPIRASI
     public function getAspirasiFiltered($filterType = '', $filterValue = '')
     {
         if (empty($filterValue)) {
@@ -46,7 +46,7 @@ class AspirasiController
         }
     }
 
-    // ==================== DETAIL ASPIRASI ====================
+    //DETAIL ASPIRASI
     public function getDetailAspirasi($id)
     {
         $aspirasi = $this->aspirasiModel->getAspirasiById($id);
@@ -60,7 +60,7 @@ class AspirasiController
         return $aspirasi;
     }
 
-    // ==================== STATISTIK ====================
+    //STATISTIK
     public function getStatistik($role = 'admin', $nis = 0)
     {
         if ($role == 'siswa') {

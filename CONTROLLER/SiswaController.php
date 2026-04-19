@@ -105,7 +105,7 @@ class SiswaController {
                 unlink('../ASSETS/GAMBAR/' . $aspirasi['foto_gambar']);
             }
 
-            // 🔥 PANGGIL MODEL (SUDAH MYSQLI)
+            // PANGGIL MODEL
             if ($this->aspirasiModel->hapusAspirasi($id, $nis)) {
                 $_SESSION['success'] = "Aspirasi berhasil dihapus!";
             } else {

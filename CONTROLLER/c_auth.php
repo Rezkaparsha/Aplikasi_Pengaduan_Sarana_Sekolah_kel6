@@ -1,21 +1,19 @@
 <?php
 session_start();
-// Memanggil file Model yang sudah di-refactor ke mysqli sebelumnya
+
 require_once '../MODEL/m_siswa.php';
 require_once '../MODEL/m_admin.php';
 
 /**
  * Class AuthController
  * Controller untuk mengelola autentikasi (login, register, logout)
- * Menggunakan konsep OOP sederhana yang memanggil Model berbasis MySQLi
+ * Menggunakan konsep OOP
  */
 class AuthController {
     private $siswaModel;
     private $adminModel;
     
-    /**
-     * Constructor
-     */
+
     public function __construct() {
         // Inisialisasi Model. 
         // Secara otomatis, Model-model ini sekarang bekerja menggunakan mysqli.
@@ -23,9 +21,8 @@ class AuthController {
         $this->adminModel = new Admin();
     }
     
-    /**
-     * Proses login siswa
-     */
+    //Proses login siswa
+
     public function loginSiswa($nis, $password) {
         // Memanggil fungsi login di model siswa
         $siswa = $this->siswaModel->login($nis, $password);
@@ -46,9 +43,8 @@ class AuthController {
         }
     }
     
-    /**
-     * Proses login admin
-     */
+    //Proses login admin
+
     public function loginAdmin($username, $password) {
         // Memanggil fungsi login di model admin
         $admin = $this->adminModel->login($username, $password);
@@ -68,9 +64,8 @@ class AuthController {
         }
     }
     
-    /**
-     * Proses register siswa
-     */
+    //Proses register siswa
+
     public function registerSiswa($data) {
         // Validasi Sederhana
         if (empty($data['nis']) || empty($data['nama']) || empty($data['kelas']) || 
@@ -80,7 +75,7 @@ class AuthController {
             exit();
         }
         
-        // Cek NIS menggunakan fungsi cekNis yang sudah kita buat di Model (mysqli)
+        // Cek NIS menggunakan fungsi cekNis yang sudah  dibuat di Model
         if ($this->siswaModel->cekNis($data['nis'])) {
             $_SESSION['error'] = "NIS sudah terdaftar!";
             header("Location: ../VIEW/auth/v_register.php");
@@ -99,9 +94,8 @@ class AuthController {
         }
     }
     
-    /**
-     * Proses logout
-     */
+    //Proses logout
+
     public function logout() {
         session_destroy();
         header("Location: ../VIEW/auth/v_login.php");
@@ -109,9 +103,8 @@ class AuthController {
     }
 }
 
-// ========================================================
-// BAGIAN HANDLE REQUEST (Pemicu aksi dari Form)
-// ========================================================
+//BAGIAN HANDLE REQUEST (Pemicu aksi dari Form)
+
 $auth = new AuthController();
 
 if (isset($_POST['login_siswa'])) {
