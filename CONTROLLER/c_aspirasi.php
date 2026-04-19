@@ -1,6 +1,5 @@
 <?php
 
-
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,10 +9,6 @@ require_once __DIR__ . '/../MODEL/m_umpanbalik.php';
 require_once __DIR__ . '/../MODEL/m_histori.php';
 require_once __DIR__ . '/../MODEL/m_progres.php';
 
-/**
- * Class AspirasiController
- * Controller untuk mengelola data aspirasi (view/fetching)
- */
 class AspirasiController
 {
     private $aspirasiModel;
@@ -21,9 +16,6 @@ class AspirasiController
     private $historiModel;
     private $progresModel;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->aspirasiModel = new Aspirasi();
@@ -32,40 +24,29 @@ class AspirasiController
         $this->progresModel = new Progres();
     }
 
-    /**
-     * Get aspirasi dengan filter
-     * @param string $filterType
-     * @param string $filterValue
-     * @return array
-     */
-    
+    // ==================== FILTER ASPIRASI ====================
     public function getAspirasiFiltered($filterType = '', $filterValue = '')
     {
         if (empty($filterValue)) {
             return $this->aspirasiModel->getAllAspirasi();
         }
 
-        switch ($filterType) {
-            case 'tanggal':
-                return $this->aspirasiModel->filterByTanggal($filterValue);
-            case 'bulan':
-                return $this->aspirasiModel->filterByBulan($filterValue);
-            case 'siswa':
-                return $this->aspirasiModel->filterBySiswa($filterValue);
-            case 'lokasi':
-                return $this->aspirasiModel->filterByLokasi($filterValue);
-            case 'status':
-                return $this->aspirasiModel->filterByStatus($filterValue);
-            default:
-                return $this->aspirasiModel->getAllAspirasi();
+        if ($filterType == 'tanggal') {
+            return $this->aspirasiModel->filterByTanggal($filterValue);
+        } elseif ($filterType == 'bulan') {
+            return $this->aspirasiModel->filterByBulan($filterValue);
+        } elseif ($filterType == 'siswa') {
+            return $this->aspirasiModel->filterBySiswa($filterValue);
+        } elseif ($filterType == 'lokasi') {
+            return $this->aspirasiModel->filterByLokasi($filterValue);
+        } elseif ($filterType == 'status') {
+            return $this->aspirasiModel->filterByStatus($filterValue);
+        } else {
+            return $this->aspirasiModel->getAllAspirasi();
         }
     }
 
-    /**
-     * Get detail aspirasi lengkap dengan relasi
-     * @param int $id
-     * @return array
-     */
+    // ==================== DETAIL ASPIRASI ====================
     public function getDetailAspirasi($id)
     {
         $aspirasi = $this->aspirasiModel->getAspirasiById($id);
@@ -79,17 +60,14 @@ class AspirasiController
         return $aspirasi;
     }
 
-    /**
-     * Get statistik untuk dashboard
-     * @param string $role
-     * @param int $nis
-     * @return array
-     */
+    // ==================== STATISTIK ====================
     public function getStatistik($role = 'admin', $nis = 0)
     {
         if ($role == 'siswa') {
             return $this->aspirasiModel->getStatistikBySiswa($nis);
+        } else {
+            return $this->aspirasiModel->getStatistik();
         }
-        return $this->aspirasiModel->getStatistik();
     }
 }
+?>

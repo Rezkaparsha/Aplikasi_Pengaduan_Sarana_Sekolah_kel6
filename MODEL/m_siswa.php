@@ -1,180 +1,132 @@
 <?php
 require_once 'm_koneksi.php';
 
-/**
- * Class Siswa
- * Model untuk mengelola data siswa
- * Menggunakan OOP dengan PDO
- */
 class Siswa {
-    private $pdo;
-    
+    private $koneksi;
+
     // Properties
     public $nis;
     public $nama;
     public $kelas;
     public $email;
     public $password;
-    
-    /**
-     * Constructor
-     */
+
+    // constructor
     public function __construct() {
-        $this->pdo = Koneksi::getInstance()->getPdo();
+        $db = new Koneksi();
+        $this->koneksi = $db->koneksi;
     }
-    
-    /**
-     * Mengambil semua data siswa
-     * @return array
-     */
+
+    // GET ALL SISWA
     public function getAllSiswa() {
         $query = "SELECT * FROM siswa ORDER BY nama ASC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    
-    /**
-     * Mengambil data siswa berdasarkan NIS
-     * @param int $nis
-     * @return array|false
-     */
+
+    // GET BY NIS
     public function getSiswaByNis($nis) {
-        $query = "SELECT * FROM siswa WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch();
+        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+        $result = mysqli_query($this->koneksi, $query);
+        return mysqli_fetch_assoc($result);
     }
-    
-    /**
-     * Login siswa
-     * @param int $nis
-     * @param string $password
-     * @return array|false
-     */
+
+    // LOGIN
     public function login($nis, $password) {
-        $query = "SELECT * FROM siswa WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        $siswa = $stmt->fetch();
-        
+        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+        $result = mysqli_query($this->koneksi, $query);
+        $siswa = mysqli_fetch_assoc($result);
+
         if ($siswa && password_verify($password, $siswa['password'])) {
             return $siswa;
         }
         return false;
     }
-    
-    /**
-     * Menambah data siswa baru
-     * @param array $data
-     * @return bool
-     */
+
+    // TAMBAH SISWA
     public function tambahSiswa($data) {
-        $query = "INSERT INTO siswa (nis, nama, kelas, email, password) 
-                  VALUES (:nis, :nama, :kelas, :email, :password)";
-        $stmt = $this->pdo->prepare($query);
-        
-        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-        
-        $stmt->bindParam(':nis', $data['nis'], PDO::PARAM_INT);
-        $stmt->bindParam(':nama', $data['nama'], PDO::PARAM_STR);
-        $stmt->bindParam(':kelas', $data['kelas'], PDO::PARAM_STR);
-        $stmt->bindParam(':email', $data['email'], PDO::PARAM_STR);
-        $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-        
-        return $stmt->execute();
+        $nis = $data['nis'];
+        $nama = $data['nama'];
+        $kelas = $data['kelas'];
+        $email = $data['email'];
+        $password = password_hash($data['password'], PASSWORD_DEFAULT);
+
+        $query = "INSERT INTO siswa (nis, nama, kelas, email, password)
+                  VALUES ('$nis', '$nama', '$kelas', '$email', '$password')";
+
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Update data siswa
-     * @param array $data
-     * @return bool
-     */
+
+    // UPDATE SISWA
     public function updateSiswa($data) {
-        $query = "UPDATE siswa SET nama = :nama, kelas = :kelas, email = :email";
-        
-        // Jika password diisi, update juga
+        $nis = $data['nis'];
+        $nama = $data['nama'];
+        $kelas = $data['kelas'];
+        $email = $data['email'];
+
         if (!empty($data['password'])) {
-            $query .= ", password = :password";
+            $password = password_hash($data['password'], PASSWORD_DEFAULT);
+
+            $query = "UPDATE siswa SET 
+                        nama = '$nama',
+                        kelas = '$kelas',
+                        email = '$email',
+                        password = '$password'
+                      WHERE nis = '$nis'";
+        } else {
+            $query = "UPDATE siswa SET 
+                        nama = '$nama',
+                        kelas = '$kelas',
+                        email = '$email'
+                      WHERE nis = '$nis'";
         }
-        
-        $query .= " WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        
-        $stmt->bindParam(':nis', $data['nis'], PDO::PARAM_INT);
-        $stmt->bindParam(':nama', $data['nama'], PDO::PARAM_STR);
-        $stmt->bindParam(':kelas', $data['kelas'], PDO::PARAM_STR);
-        $stmt->bindParam(':email', $data['email'], PDO::PARAM_STR);
-        
-        if (!empty($data['password'])) {
-            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-            $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-        }
-        
-        return $stmt->execute();
+
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Hapus data siswa
-     * @param int $nis
-     * @return bool
-     */
+
+    // HAPUS SISWA
     public function hapusSiswa($nis) {
-        $query = "DELETE FROM siswa WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        return $stmt->execute();
+        $query = "DELETE FROM siswa WHERE nis = '$nis'";
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Cek apakah NIS sudah terdaftar
-     * @param int $nis
-     * @return bool
-     */
+
+    // CEK NIS
     public function cekNis($nis) {
-        $query = "SELECT COUNT(*) FROM siswa WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchColumn() > 0;
+        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+        $result = mysqli_query($this->koneksi, $query);
+
+        return mysqli_num_rows($result) > 0;
     }
-    
-    /**
-     * Update profil siswa
-     * @param int $nis
-     * @param array $data
-     * @return bool
-     */
+
+    // UPDATE PROFIL
     public function updateProfil($nis, $data) {
-        $query = "UPDATE siswa SET nama = :nama, kelas = :kelas, email = :email WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->bindParam(':nama', $data['nama'], PDO::PARAM_STR);
-        $stmt->bindParam(':kelas', $data['kelas'], PDO::PARAM_STR);
-        $stmt->bindParam(':email', $data['email'], PDO::PARAM_STR);
-        
-        return $stmt->execute();
+        $nama = $data['nama'];
+        $kelas = $data['kelas'];
+        $email = $data['email'];
+
+        $query = "UPDATE siswa SET 
+                    nama = '$nama',
+                    kelas = '$kelas',
+                    email = '$email'
+                  WHERE nis = '$nis'";
+
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Update password siswa
-     * @param int $nis
-     * @param string $passwordBaru
-     * @return bool
-     */
+
+    // UPDATE PASSWORD
     public function updatePassword($nis, $passwordBaru) {
-        $query = "UPDATE siswa SET password = :password WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        
-        $hashedPassword = password_hash($passwordBaru, PASSWORD_DEFAULT);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-        
-        return $stmt->execute();
+        $password = password_hash($passwordBaru, PASSWORD_DEFAULT);
+
+        $query = "UPDATE siswa SET 
+                    password = '$password'
+                  WHERE nis = '$nis'";
+
+        return mysqli_query($this->koneksi, $query);
     }
 }
 ?>

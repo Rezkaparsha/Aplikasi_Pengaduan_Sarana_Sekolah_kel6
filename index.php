@@ -5,7 +5,7 @@
  * 
  * Aplikasi ini dibuat menggunakan:
  * - PHP dengan OOP (Object Oriented Programming)
- * - MySQL Database dengan PDO
+ * - MySQL Database 
  * - MVC Pattern (Model-View-Controller)
  * 
  * Fitur:

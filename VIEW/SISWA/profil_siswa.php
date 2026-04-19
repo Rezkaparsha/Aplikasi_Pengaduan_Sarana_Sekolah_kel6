@@ -44,7 +44,7 @@ $siswa = $siswaModel->getSiswaByNis($_SESSION['nis']);
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <!-- Update Profil -->
                 <div class="card" style="background: #f8f9fa;">
-                    <h3><i class="fas fa-edit"></i> Update Profil</h3>
+                    <h3><i class="fas fa-edit"></i> Update Profil</h3><br>
                     <form action="../../CONTROLLER/SiswaController.php" method="POST">
                         <div class="form-group">
                             <label><i class="fas fa-id-card"></i> NIS</label>
@@ -70,7 +70,7 @@ $siswa = $siswaModel->getSiswaByNis($_SESSION['nis']);
 
                 <!-- Update Password -->
                 <div class="card" style="background: #f8f9fa;">
-                    <h3><i class="fas fa-lock"></i> Ubah Password</h3>
+                    <h3><i class="fas fa-lock"></i> Ubah Password</h3><br>
                     <form action="../../CONTROLLER/SiswaController.php" method="POST">
                         <div class="form-group">
                             <label><i class="fas fa-lock"></i> Password Lama</label>

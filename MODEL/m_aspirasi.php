@@ -1,14 +1,9 @@
 <?php
 require_once 'm_koneksi.php';
 
-/**
- * Class Aspirasi
- * Model untuk mengelola data aspirasi/pengaduan
- * Menggunakan OOP dengan PDO
- */
 class Aspirasi {
-    private $pdo;
-    
+    private $koneksi;
+
     // Properties
     public $id_aspirasi;
     public $nis;
@@ -20,261 +15,235 @@ class Aspirasi {
     public $foto_gambar;
     public $tanggal_dikirim;
     public $status;
-    
-    /**
-     * Constructor
-     */
+
+    // constructor
     public function __construct() {
-        $this->pdo = Koneksi::getInstance()->getPdo();
+        $db = new Koneksi();
+        $this->koneksi = $db->koneksi;
     }
-    
-    /**
-     * Mengambil semua aspirasi
-     * @return array
-     */
+
+    // ===================== GET =====================
+
     public function getAllAspirasi() {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
                   ORDER BY a.tanggal_dikirim DESC, a.id_aspirasi DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Mengambil aspirasi berdasarkan ID
-     * @param int $id
-     * @return array|false
-     */
+
     public function getAspirasiById($id) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas, s.email 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE a.id_aspirasi = :id";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch();
+        $id = intval($id);
+
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas, s.email
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE a.id_aspirasi = $id";
+
+        $result = mysqli_query($this->koneksi, $query);
+        return mysqli_fetch_assoc($result);
     }
-    
-    /**
-     * Mengambil aspirasi berdasarkan NIS siswa
-     * @param int $nis
-     * @return array
-     */
+
     public function getAspirasiByNis($nis) {
-        $query = "SELECT * FROM aspirasi WHERE nis = :nis ORDER BY tanggal_dikirim DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $nis = intval($nis);
+
+        $query = "SELECT * FROM aspirasi 
+                  WHERE nis = $nis 
+                  ORDER BY tanggal_dikirim DESC";
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Menambah aspirasi baru
-     * @param array $data
-     * @return int|false ID aspirasi yang baru dibuat
-     */
+
+    // ===================== INSERT =====================
+
     public function tambahAspirasi($data) {
-        $query = "INSERT INTO aspirasi (nis, judul_laporan, keterangan, kategori_prioritas, lokasi, foto_gambar, tanggal_dikirim) 
-                  VALUES (:nis, :judul, :keterangan, :prioritas, :lokasi, :foto, CURDATE())";
-        $stmt = $this->pdo->prepare($query);
-        
-        $stmt->bindParam(':nis', $data['nis'], PDO::PARAM_INT);
-        $stmt->bindParam(':judul', $data['judul_laporan'], PDO::PARAM_STR);
-        $stmt->bindParam(':keterangan', $data['keterangan'], PDO::PARAM_STR);
-        $stmt->bindParam(':prioritas', $data['kategori_prioritas'], PDO::PARAM_STR);
-        $stmt->bindParam(':lokasi', $data['lokasi'], PDO::PARAM_STR);
-        $stmt->bindParam(':foto', $data['foto_gambar'], PDO::PARAM_STR);
-        
-        if ($stmt->execute()) {
-            return $this->pdo->lastInsertId();
+        $nis = intval($data['nis']);
+        $judul = $data['judul_laporan'];
+        $ket = $data['keterangan'];
+        $prioritas = $data['kategori_prioritas'];
+        $lokasi = $data['lokasi'];
+        $foto = $data['foto_gambar'];
+
+        $query = "INSERT INTO aspirasi 
+                  (nis, judul_laporan, keterangan, kategori_prioritas, lokasi, foto_gambar, tanggal_dikirim)
+                  VALUES ('$nis', '$judul', '$ket', '$prioritas', '$lokasi', '$foto', CURDATE())";
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        if ($result) {
+            return mysqli_insert_id($this->koneksi);
         }
         return false;
     }
-    
-    /**
-     * Update status aspirasi
-     * @param int $id
-     * @param string $status
-     * @param int $idAdmin
-     * @return bool
-     */
+
+    // ===================== UPDATE =====================
+
     public function updateStatus($id, $status, $idAdmin) {
-        $query = "UPDATE aspirasi SET status = :status, id_admin = :id_admin WHERE id_aspirasi = :id";
-        $stmt = $this->pdo->prepare($query);
-        
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-        $stmt->bindParam(':id_admin', $idAdmin, PDO::PARAM_INT);
-        
-        return $stmt->execute();
+        $id = intval($id);
+        $idAdmin = intval($idAdmin);
+
+        $query = "UPDATE aspirasi 
+                  SET status = '$status', id_admin = '$idAdmin'
+                  WHERE id_aspirasi = $id";
+
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Update kategori prioritas
-     * @param int $id
-     * @param string $prioritas
-     * @return bool
-     */
+
     public function updatePrioritas($id, $prioritas) {
-        $query = "UPDATE aspirasi SET kategori_prioritas = :prioritas WHERE id_aspirasi = :id";
-        $stmt = $this->pdo->prepare($query);
-        
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':prioritas', $prioritas, PDO::PARAM_STR);
-        
-        return $stmt->execute();
+        $id = intval($id);
+
+        $query = "UPDATE aspirasi 
+                  SET kategori_prioritas = '$prioritas'
+                  WHERE id_aspirasi = $id";
+
+        return mysqli_query($this->koneksi, $query);
     }
-    
-    /**
-     * Filter aspirasi berdasarkan tanggal
-     * @param string $tanggal
-     * @return array
-     */
+
+    // ===================== DELETE (INI YANG PENTING) =====================
+
+    public function hapusAspirasi($id, $nis) {
+        $id = intval($id);
+        $nis = intval($nis);
+
+        $query = "DELETE FROM aspirasi 
+                  WHERE id_aspirasi = $id AND nis = $nis";
+
+        return mysqli_query($this->koneksi, $query);
+    }
+
+    // ===================== FILTER =====================
+
     public function filterByTanggal($tanggal) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE a.tanggal_dikirim = :tanggal 
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE a.tanggal_dikirim = '$tanggal'
                   ORDER BY a.id_aspirasi DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':tanggal', $tanggal, PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Filter aspirasi berdasarkan bulan
-     * @param string $bulan (format: YYYY-MM)
-     * @return array
-     */
+
     public function filterByBulan($bulan) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE DATE_FORMAT(a.tanggal_dikirim, '%Y-%m') = :bulan 
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE DATE_FORMAT(a.tanggal_dikirim, '%Y-%m') = '$bulan'
                   ORDER BY a.id_aspirasi DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':bulan', $bulan, PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Filter aspirasi berdasarkan siswa
-     * @param int $nis
-     * @return array
-     */
+
     public function filterBySiswa($nis) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE a.nis = :nis 
+        $nis = intval($nis);
+
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE a.nis = $nis
                   ORDER BY a.tanggal_dikirim DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Filter aspirasi berdasarkan kategori/lokasi
-     * @param string $lokasi
-     * @return array
-     */
+
     public function filterByLokasi($lokasi) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE a.lokasi = :lokasi 
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE a.lokasi = '$lokasi'
                   ORDER BY a.tanggal_dikirim DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':lokasi', $lokasi, PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Filter aspirasi berdasarkan status
-     * @param string $status
-     * @return array
-     */
+
     public function filterByStatus($status) {
-        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas 
-                  FROM aspirasi a 
-                  JOIN siswa s ON a.nis = s.nis 
-                  WHERE a.status = :status 
+        $query = "SELECT a.*, s.nama as nama_siswa, s.kelas
+                  FROM aspirasi a
+                  JOIN siswa s ON a.nis = s.nis
+                  WHERE a.status = '$status'
                   ORDER BY a.tanggal_dikirim DESC";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll();
+
+        $result = mysqli_query($this->koneksi, $query);
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
     }
-    
-    /**
-     * Mendapatkan statistik aspirasi
-     * @return array
-     */
+
+    // ===================== STATISTIK =====================
+
     public function getStatistik() {
         $statistik = [];
-        
-        // Total aspirasi
-        $query = "SELECT COUNT(*) FROM aspirasi";
-        $statistik['total'] = $this->pdo->query($query)->fetchColumn();
-        
-        // Aspirasi menunggu
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE status = 'menunggu'";
-        $statistik['menunggu'] = $this->pdo->query($query)->fetchColumn();
-        
-        // Aspirasi diproses
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE status = 'diproses'";
-        $statistik['diproses'] = $this->pdo->query($query)->fetchColumn();
-        
-        // Aspirasi selesai
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE status = 'selesai'";
-        $statistik['selesai'] = $this->pdo->query($query)->fetchColumn();
-        
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi");
+        $statistik['total'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE status='menunggu'");
+        $statistik['menunggu'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE status='diproses'");
+        $statistik['diproses'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE status='selesai'");
+        $statistik['selesai'] = mysqli_fetch_assoc($result)['total'];
+
         return $statistik;
     }
-    
-    /**
-     * Mendapatkan statistik aspirasi per siswa
-     * @param int $nis
-     * @return array
-     */
+
     public function getStatistikBySiswa($nis) {
+        $nis = intval($nis);
         $statistik = [];
-        
-        // Total aspirasi siswa
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE nis = :nis";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        $statistik['total'] = $stmt->fetchColumn();
-        
-        // Aspirasi menunggu
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE nis = :nis AND status = 'menunggu'";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        $statistik['menunggu'] = $stmt->fetchColumn();
-        
-        // Aspirasi diproses
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE nis = :nis AND status = 'diproses'";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        $statistik['diproses'] = $stmt->fetchColumn();
-        
-        // Aspirasi selesai
-        $query = "SELECT COUNT(*) FROM aspirasi WHERE nis = :nis AND status = 'selesai'";
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':nis', $nis, PDO::PARAM_INT);
-        $stmt->execute();
-        $statistik['selesai'] = $stmt->fetchColumn();
-        
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE nis=$nis");
+        $statistik['total'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE nis=$nis AND status='menunggu'");
+        $statistik['menunggu'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE nis=$nis AND status='diproses'");
+        $statistik['diproses'] = mysqli_fetch_assoc($result)['total'];
+
+        $result = mysqli_query($this->koneksi, "SELECT COUNT(*) as total FROM aspirasi WHERE nis=$nis AND status='selesai'");
+        $statistik['selesai'] = mysqli_fetch_assoc($result)['total'];
+
         return $statistik;
     }
 }
