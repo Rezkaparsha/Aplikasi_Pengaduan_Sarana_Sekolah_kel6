@@ -67,7 +67,7 @@ class AuthController {
     //Proses register siswa
 
     public function registerSiswa($data) {
-        // Validasi Sederhana
+        // Validasi Untuk register
         if (empty($data['nis']) || empty($data['nama']) || empty($data['kelas']) || 
             empty($data['email']) || empty($data['password'])) {
             $_SESSION['error'] = "Semua field harus diisi!";
