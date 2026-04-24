@@ -1,11 +1,9 @@
 **Admin:**
-- Username: `admin`
-- Password: `password`
+- Username: Rezka
+- Password: password
 
 **Siswa:**
-- NIS: `12345`
-- Password: `password`
+- NIS: 123
+- Password: 123
 
 link website: https://mysarprass.42web.io/VIEW/auth/v_login.php
-
-

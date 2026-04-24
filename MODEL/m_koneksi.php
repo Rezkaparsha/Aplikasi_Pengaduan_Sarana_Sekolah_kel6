@@ -1,5 +1,4 @@
 <?php
-// Class Koneksi versi mysqli (OOP sederhana)
 
 class Koneksi
 {

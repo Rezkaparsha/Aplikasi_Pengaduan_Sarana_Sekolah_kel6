@@ -1,131 +1,246 @@
 <?php
+
 require_once 'm_koneksi.php';
 
+// Class Siswa digunakan untuk mengelola data siswa seperti login, register, edit profil, ubah password, dll
 class Siswa {
+
+    // Property private untuk menyimpan koneksi database
     private $koneksi;
 
-    // Properties
-    public $nis;
-    public $nama;
-    public $kelas;
-    public $email;
-    public $password;
+    // PROPERTI DATA SISWA
+    // Digunakan untuk menampung data dari tabel siswa
+    public $nis;        
+    public $nama;       
+    public $kelas; 
+    public $email; 
+    public $password;   
 
-    // constructor
+    // CONSTRUCTOR
+    // Otomatis berjalan saat object dibuat
+    // Mengambil koneksi dari class Koneksi
+
     public function __construct() {
+
+        // Membuat object koneksi database
         $db = new Koneksi();
+
+        // Menyimpan koneksi ke property $koneksi
         $this->koneksi = $db->koneksi;
     }
 
-    // GET ALL SISWA
+    // FUNCTION GET ALL SISWA
+    // Mengambil seluruh data siswa dari database
+    // Biasanya digunakan untuk halaman daftar sisw
     public function getAllSiswa() {
-        $query = "SELECT * FROM siswa ORDER BY nama ASC";
+
+        // Query mengambil semua data siswa
+        // Diurutkan berdasarkan nama A-Z
+        $query = "SELECT * FROM siswa
+                  ORDER BY nama ASC";
+
+        // Menjalankan query
         $result = mysqli_query($this->koneksi, $query);
 
+        // Menyiapkan array kosong
         $data = [];
+
+        // Mengambil semua data satu per satu
         while ($row = mysqli_fetch_assoc($result)) {
+
+            // Menyimpan ke dalam array
             $data[] = $row;
         }
+
+        // Mengembalikan seluruh data siswa
         return $data;
     }
 
-    // GET BY NIS
+    // FUNCTION GET SISWA BY NIS
+    // Mengambil 1 data siswa berdasarkan NIS
+    // Biasanya digunakan untuk edit atau profi
     public function getSiswaByNis($nis) {
-        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+
+        // Query mencari siswa berdasarkan NIS
+        $query = "SELECT * FROM siswa
+                  WHERE nis = '$nis'";
+
+        // Menjalankan query
         $result = mysqli_query($this->koneksi, $query);
+
+        // Mengembalikan 1 data siswa
         return mysqli_fetch_assoc($result);
     }
 
-    // LOGIN
+    // FUNCTION LOGIN
+    // Digunakan untuk proses login siswa
+    // Mengecek NIS dan password
     public function login($nis, $password) {
-        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+
+        // Query mencari siswa berdasarkan NIS
+        $query = "SELECT * FROM siswa
+                  WHERE nis = '$nis'";
+
+        // Menjalankan query
         $result = mysqli_query($this->koneksi, $query);
+
+        // Mengambil hasil query
         $siswa = mysqli_fetch_assoc($result);
 
+        // Jika data ditemukan dan password cocok
         if ($siswa && password_verify($password, $siswa['password'])) {
+
+            // Mengembalikan data siswa
             return $siswa;
         }
+
+        // Jika login gagal
         return false;
     }
-
-    // TAMBAH SISWA
+    // FUNCTION TAMBAH SISWA
     public function tambahSiswa($data) {
+
+        // Mengambil data dari form
         $nis = $data['nis'];
         $nama = $data['nama'];
         $kelas = $data['kelas'];
         $email = $data['email'];
-        $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO siswa (nis, nama, kelas, email, password)
-                  VALUES ('$nis', '$nama', '$kelas', '$email', '$password')";
+        // Password di-hash agar lebih aman
+        $password = password_hash(
+            $data['password'],
+            PASSWORD_DEFAULT
+        );
 
+        // Query insert data siswa baru
+        $query = "INSERT INTO siswa
+                  (
+                    nis,
+                    nama,
+                    kelas,
+                    email,
+                    password
+                  )
+                  VALUES
+                  (
+                    '$nis',
+                    '$nama',
+                    '$kelas',
+                    '$email',
+                    '$password'
+                  )";
+
+        // Menjalankan query insert
         return mysqli_query($this->koneksi, $query);
     }
 
-    // UPDATE SISWA
+    // FUNCTION UPDATE SISWA
+    // Mengubah data siswa
+    // Jika password diisi maka password ikut diubah
     public function updateSiswa($data) {
+
+        // Mengambil data dari form
         $nis = $data['nis'];
         $nama = $data['nama'];
         $kelas = $data['kelas'];
         $email = $data['email'];
 
+        // Jika password baru diisi
         if (!empty($data['password'])) {
-            $password = password_hash($data['password'], PASSWORD_DEFAULT);
 
-            $query = "UPDATE siswa SET 
+            // Password baru di-hash
+            $password = password_hash(
+                $data['password'],
+                PASSWORD_DEFAULT
+            );
+
+            // Query update termasuk password
+            $query = "UPDATE siswa SET
                         nama = '$nama',
                         kelas = '$kelas',
                         email = '$email',
                         password = '$password'
                       WHERE nis = '$nis'";
+
         } else {
-            $query = "UPDATE siswa SET 
+
+            // Query update tanpa password
+            $query = "UPDATE siswa SET
                         nama = '$nama',
                         kelas = '$kelas',
                         email = '$email'
                       WHERE nis = '$nis'";
         }
 
+        // Menjalankan query update
         return mysqli_query($this->koneksi, $query);
     }
 
-    // HAPUS SISWA
+    // FUNCTION HAPUS SISWA
     public function hapusSiswa($nis) {
-        $query = "DELETE FROM siswa WHERE nis = '$nis'";
+
+        // Query delete siswa
+        $query = "DELETE FROM siswa
+                  WHERE nis = '$nis'";
+
+        // Menjalankan query hapus
         return mysqli_query($this->koneksi, $query);
     }
 
-    // CEK NIS
+    // FUNCTION CEK NIS
+    // Mengecek apakah NIS sudah terdaftar
+    // Digunakan saat proses registrasi
     public function cekNis($nis) {
-        $query = "SELECT * FROM siswa WHERE nis = '$nis'";
+
+        // Query mencari NIS yang sama
+        $query = "SELECT * FROM siswa
+                  WHERE nis = '$nis'";
+
+        // Menjalankan query
         $result = mysqli_query($this->koneksi, $query);
 
+        // Jika jumlah data > 0
+        // berarti NIS sudah digunakan
         return mysqli_num_rows($result) > 0;
     }
 
-    // UPDATE PROFIL
+    // FUNCTION UPDATE PROFIL
+    // Digunakan siswa untuk mengubah profil sendiri
+    // Tanpa mengubah password
     public function updateProfil($nis, $data) {
+
+        // Mengambil data baru dari form
         $nama = $data['nama'];
         $kelas = $data['kelas'];
         $email = $data['email'];
 
-        $query = "UPDATE siswa SET 
+        // Query update profil
+        $query = "UPDATE siswa SET
                     nama = '$nama',
                     kelas = '$kelas',
                     email = '$email'
                   WHERE nis = '$nis'";
 
+        // Menjalankan query update
         return mysqli_query($this->koneksi, $query);
     }
 
-    // UPDATE PASSWORD
+    // FUNCTION UPDATE PASSWORD
+    // Digunakan siswa untuk mengganti password akun
     public function updatePassword($nis, $passwordBaru) {
-        $password = password_hash($passwordBaru, PASSWORD_DEFAULT);
 
-        $query = "UPDATE siswa SET 
+        // Password baru di-hash agar aman
+        $password = password_hash(
+            $passwordBaru,
+            PASSWORD_DEFAULT
+        );
+
+        // Query update password
+        $query = "UPDATE siswa SET
                     password = '$password'
                   WHERE nis = '$nis'";
 
+        // Menjalankan query update
         return mysqli_query($this->koneksi, $query);
     }
 }
